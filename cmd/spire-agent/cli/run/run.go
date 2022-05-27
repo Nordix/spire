@@ -598,7 +598,7 @@ func defaultConfig() *Config {
 }
 
 func parseTrustBundle(path string) ([]*x509.Certificate, error) {
-	bundle, err := pemutil.LoadCertificates(path)
+	bundle, err := waitForTrustBundle(path, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -608,4 +608,19 @@ func parseTrustBundle(path string) ([]*x509.Certificate, error) {
 	}
 
 	return bundle, nil
+}
+
+func waitForTrustBundle(path string, retries int) ([]*x509.Certificate, error) {
+	bundle, err := pemutil.LoadCertificates(path)
+	if err == nil {
+		return bundle, nil
+	}
+
+	// 5 seconds expired, let's throw an error
+	if retries == 50 {
+		return nil, err
+	}
+	logrus.Warn("Trust bundle not found.")
+	time.Sleep(100 * time.Millisecond)
+	return waitForTrustBundle(path, retries+1)
 }
