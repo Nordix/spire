@@ -13,10 +13,16 @@ FROM alpine AS spire-base
 RUN apk --no-cache add dumb-init
 RUN apk --no-cache add ca-certificates
 RUN mkdir -p /opt/spire/bin
+ARG user=spire
+ARG id=2001
+RUN apk add libcap shadow
+RUN groupadd -g ${id} ${user}
+RUN useradd -g ${id} -l -M -u ${id} ${user}
 
 # SPIRE Server
 FROM spire-base AS spire-server
 COPY --from=builder /spire/bin/spire-server /opt/spire/bin/spire-server
+RUN /usr/sbin/setcap cap_dac_override=eip /opt/spire/bin/spire-server
 WORKDIR /opt/spire
 ENTRYPOINT ["/usr/bin/dumb-init", "/opt/spire/bin/spire-server", "run"]
 CMD []
@@ -24,6 +30,7 @@ CMD []
 # SPIRE Agent
 FROM spire-base AS spire-agent
 COPY --from=builder /spire/bin/spire-agent /opt/spire/bin/spire-agent
+RUN /usr/sbin/setcap cap_dac_override=eip /opt/spire/bin/spire-agent
 WORKDIR /opt/spire
 ENTRYPOINT ["/usr/bin/dumb-init", "/opt/spire/bin/spire-agent", "run"]
 CMD []
@@ -31,6 +38,7 @@ CMD []
 # K8S Workload Registrar
 FROM spire-base AS k8s-workload-registrar
 COPY --from=builder /spire/bin/k8s-workload-registrar /opt/spire/bin/k8s-workload-registrar
+RUN /usr/sbin/setcap cap_dac_override=eip /opt/spire/bin/k8s-workload-registrar
 WORKDIR /opt/spire
 ENTRYPOINT ["/usr/bin/dumb-init", "/opt/spire/bin/k8s-workload-registrar"]
 CMD []
@@ -38,6 +46,7 @@ CMD []
 # OIDC Discovery Provider
 FROM spire-base AS oidc-discovery-provider
 COPY --from=builder /spire/bin/oidc-discovery-provider /opt/spire/bin/oidc-discovery-provider
+RUN /usr/sbin/setcap cap_dac_override=eip /opt/spire/bin/oidc-discovery-provider
 WORKDIR /opt/spire
 ENTRYPOINT ["/usr/bin/dumb-init", "/opt/spire/bin/oidc-discovery-provider"]
 CMD []
