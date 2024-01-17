@@ -8,8 +8,8 @@ require (
 	cloud.google.com/go/secretmanager v1.11.4
 	cloud.google.com/go/security v1.15.4
 	cloud.google.com/go/storage v1.35.1
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.1
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.0
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys v0.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute v1.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.1.0
@@ -74,7 +74,7 @@ require (
 	github.com/uber-go/tally/v4 v4.1.10
 	github.com/valyala/fastjson v1.6.4
 	github.com/zeebo/errs v1.3.0
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/net v0.19.0
 	golang.org/x/sync v0.5.0
 	golang.org/x/sys v0.15.0
@@ -98,7 +98,7 @@ require (
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper v0.2.0 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.7.1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.29 // indirect
@@ -108,7 +108,7 @@ require (
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.0 // indirect
+	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.1 // indirect
 	github.com/DataDog/datadog-go v3.2.0+incompatible // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
@@ -194,7 +194,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/certificate-transparency-go v1.1.7 // indirect
@@ -207,7 +207,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/logger v1.1.1 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.4.0 // indirect
+	github.com/google/uuid v1.5.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -261,7 +261,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
+	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
