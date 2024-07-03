@@ -13,14 +13,26 @@ import (
 	"github.com/spiffe/spire/pkg/common/version"
 )
 
-// Each time the database requires a migration, the "schema" version is
-// increased and the migration code is added to this file. The migration code
-// can be opportunistically removed after the following minor version has been
-// released, since the supported upgrade path happens on minor version
-// boundaries. For example, when 1.2 is released, the migrations that were
-// handled by 1.1.x can be removed, since anyone upgrading from 1.0.X to 1.2.X
-// will have to upgrade through 1.1.X first, which will apply the proper
-// migrations before those done by 1.2.
+// Each time the database requires a migration, the "schema" version is increased and
+// the migration code is added to this file.
+//
+// This is an alternative version of the migration code that does not follow the maintenance
+// strategy of SPIRE, because it contains more schema changes than one minor release to be able
+// to support upgrade from older versions too. The schema upgrade is done step-by-step from
+// the first change to the current one.
+//
+// Another thing changed to the original migration strategy is that backward compatibility
+// is considered, this way a rollback is also supported to the previous version which contained
+// another schema. For example: v1.6.0 (schema 20) removes a column from a table. Rolling back
+// to 1.5.6 (schema 19) would not be possible because there is a missing column from the table
+// which the code wants to use.
+//
+// This version supports the migration from schema 19 to 23, meaning that the code base of
+// the upgrade can be 1.3.2 up to 1.5.6.
+//
+// Code version in the database will not be updated to keep backward compatibility with the old
+// version to support code rollback. Migration table will contain the code version that initialized
+// the database. The later migrations will just modify the updated_at field and the schema version.
 //
 // For convenience, the following table lists the schema versions for each
 // SPIRE release, along with what was added in each schema change. SPIRE v0.6.2
@@ -242,10 +254,10 @@ const (
 	// the latest schema version of the database in the code
 	latestSchemaVersion = 23
 
-	// lastMinorReleaseSchemaVersion is the schema version supported by the
-	// last minor release. When the migrations are opportunistically pruned
-	// from the code after a minor release, this number should be updated.
-	lastMinorReleaseSchemaVersion = 21
+	// lastMinorReleaseSchemaVersion is the schema version supported by the used minor release.
+	// When another upgrade path is needed then this number should be updated accordingly.
+	//
+	lastMinorReleaseSchemaVersion = 19
 )
 
 // the current code version
@@ -294,11 +306,12 @@ func migrateDB(db *gorm.DB, dbType string, disableMigration bool, log logrus.Fie
 	if schemaVersion == latestSchemaVersion {
 		log.Debug("Code and DB schema versions are the same. No migration needed")
 
-		// same DB schema; if current code version greater than stored, store newer code version
+		// same DB schema; if current code version greater than stored, store time in updated_at field
 		if codeVersion.GT(dbCodeVersion) {
 			newMigration := Migration{
-				Version:     latestSchemaVersion,
-				CodeVersion: codeVersion.String(),
+				Version: latestSchemaVersion,
+				// Don't update code version in the database to support rollback.
+				// CodeVersion: codeVersion.String(),
 			}
 
 			if err := db.Model(&Migration{}).Updates(newMigration).Error; err != nil {
@@ -442,10 +455,12 @@ func tableOptionsForDialect(tx *gorm.DB, dbType string) *gorm.DB {
 func migrateVersion(tx *gorm.DB, currVersion int, log logrus.FieldLogger) (versionOut int, err error) {
 	log.WithField(telemetry.VersionInfo, currVersion).Info("Migrating version")
 
-	nextVersion := currVersion + 1
+	//	nextVersion must be defined
+	nextVersion := 23
 	if err := tx.Model(&Migration{}).Updates(Migration{
-		Version:     nextVersion,
-		CodeVersion: version.Version(),
+		Version: nextVersion,
+		// Don't add code version because it will prevent rollback.
+		// CodeVersion: version.Version(),
 	}).Error; err != nil {
 		return 0, sqlError.Wrap(err)
 	}
@@ -454,16 +469,20 @@ func migrateVersion(tx *gorm.DB, currVersion int, log logrus.FieldLogger) (versi
 		return 0, sqlError.New("migrating from schema version %d requires a previous SPIRE release; please follow the upgrade strategy at doc/upgrading.md", currVersion)
 	}
 
-	// Place all migrations handled by the current minor release here. This
-	// list can be opportunistically pruned after every minor release but won't
-	// break things if it isn't.
+	// This is a specific migration which changes the schema from version 19 to 23 in a backward compatible way.
+	// So, dropping columns will not be performed to support rolling back to the older version (19) therefore
+	// no migration step to schema version 20.
 	switch currVersion {
-	case 21:
-		// TODO: remove this migration in 1.9.0
-		err = migrateToV22(tx)
-	case 22:
-		// TODO: remove this migration in 1.9.0
-		err = migrateToV23(tx)
+	case 19:
+		if err = migrateToV21(tx); err != nil {
+			return 0, err
+		}
+		if err = migrateToV22(tx); err != nil {
+			return 0, err
+		}
+		if err = migrateToV23(tx); err != nil {
+			return 0, err
+		}
 	default:
 		err = sqlError.New("no migration support for unknown schema version %d", currVersion)
 	}
@@ -472,6 +491,13 @@ func migrateVersion(tx *gorm.DB, currVersion int, log logrus.FieldLogger) (versi
 	}
 
 	return nextVersion, nil
+}
+
+func migrateToV21(tx *gorm.DB) error {
+	if err := tx.AutoMigrate(&RegisteredEntry{}).Error; err != nil {
+		return sqlError.Wrap(err)
+	}
+	return nil
 }
 
 func migrateToV22(tx *gorm.DB) error {
