@@ -26,7 +26,6 @@ import (
 	"github.com/spiffe/spire/pkg/common/catalog"
 	"github.com/spiffe/spire/pkg/common/pemutil"
 	"github.com/spiffe/spire/pkg/common/telemetry"
-	"github.com/valyala/fastjson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
@@ -224,7 +223,7 @@ func (p *Plugin) Attest(ctx context.Context, req *workloadattestorv1.AttestReque
 			return nil, err
 		}
 
-		var parser fastjson.Parser
+		var parser Parser
 		podList, err := parser.ParseBytes(podListBytes)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "unable to parse kubelet response: %v", err)
