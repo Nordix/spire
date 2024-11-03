@@ -27,7 +27,6 @@ import (
 	"github.com/spiffe/spire/pkg/common/pemutil"
 	"github.com/spiffe/spire/pkg/common/pluginconf"
 	"github.com/spiffe/spire/pkg/common/telemetry"
-	"github.com/valyala/fastjson"
 	"golang.org/x/sync/singleflight"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -274,7 +273,7 @@ type Plugin struct {
 	containerHelper  ContainerHelper
 	sigstoreVerifier sigstore.Verifier
 
-	cachedPodList map[string]*fastjson.Value
+	cachedPodList map[string]*Value
 	singleflight  singleflight.Group
 
 	shutdownCtx       context.Context
@@ -465,7 +464,7 @@ func (p *Plugin) getConfig() (*k8sConfig, ContainerHelper, sigstore.Verifier, er
 	return p.config, p.containerHelper, p.sigstoreVerifier, nil
 }
 
-func (p *Plugin) setPodListCache(podList map[string]*fastjson.Value, expires time.Duration) {
+func (p *Plugin) setPodListCache(podList map[string]*Value, expires time.Duration) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -486,7 +485,7 @@ func (p *Plugin) setPodListCache(podList map[string]*fastjson.Value, expires tim
 	}()
 }
 
-func (p *Plugin) getPodListCache() map[string]*fastjson.Value {
+func (p *Plugin) getPodListCache() map[string]*Value {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
@@ -668,7 +667,7 @@ func (p *Plugin) getNodeName(name string, env string) string {
 	}
 }
 
-func (p *Plugin) getPodList(ctx context.Context, client *kubeletClient) (map[string]*fastjson.Value, error) {
+func (p *Plugin) getPodList(ctx context.Context, client *kubeletClient) (map[string]*Value, error) {
 	result := p.getPodListCache()
 	if result != nil {
 		return result, nil
@@ -685,14 +684,14 @@ func (p *Plugin) getPodList(ctx context.Context, client *kubeletClient) (map[str
 			return nil, err
 		}
 
-		var parser fastjson.Parser
+		var parser Parser
 		podList, err := parser.ParseBytes(podListBytes)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "unable to parse kubelet response: %v", err)
 		}
 
 		items := podList.GetArray("items")
-		result = make(map[string]*fastjson.Value, len(items))
+		result = make(map[string]*Value, len(items))
 
 		for _, podValue := range items {
 			uid := string(podValue.Get("metadata", "uid").GetStringBytes())
@@ -713,7 +712,7 @@ func (p *Plugin) getPodList(ctx context.Context, client *kubeletClient) (map[str
 		return nil, err
 	}
 
-	return podList.(map[string]*fastjson.Value), nil
+	return podList.(map[string]*Value), nil
 }
 
 type kubeletClient struct {
