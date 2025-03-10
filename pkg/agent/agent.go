@@ -60,6 +60,10 @@ func (a *Agent) Run(ctx context.Context) error {
 		return err
 	}
 
+	a.c.Log.WithFields(logrus.Fields{
+		"LaunchLogLevel": a.c.LaunchLogLevel,
+	}).Info("Log Level")
+
 	sto, err := storage.Open(a.c.DataDir)
 	if err != nil {
 		return fmt.Errorf("failed to open storage: %w", err)
@@ -361,6 +365,8 @@ func (a *Agent) newEndpoints(metrics telemetry.Metrics, mgr manager.Manager, att
 		Attestor:                      attestor,
 		Manager:                       mgr,
 		Log:                           a.c.Log.WithField(telemetry.SubsystemName, telemetry.Endpoints),
+		RootLog:                       a.c.Log,
+		LaunchLogLevel:                a.c.LaunchLogLevel,
 		Metrics:                       metrics,
 		DefaultSVIDName:               a.c.DefaultSVIDName,
 		DefaultBundleName:             a.c.DefaultBundleName,

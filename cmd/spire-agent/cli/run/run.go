@@ -494,6 +494,13 @@ func NewAgentConfig(c *Config, logOptions []log.Option, allowUnknownConfig bool)
 	if err != nil {
 		return nil, fmt.Errorf("could not start logger: %w", err)
 	}
+
+	level, err := logrus.ParseLevel(c.Agent.LogLevel)
+	if err != nil {
+		return nil, fmt.Errorf("invalid log level %q: %w", c.Agent.LogLevel, err)
+	}
+	ac.LaunchLogLevel = level
+
 	ac.Log = logger
 	if reopenableFile != nil {
 		ac.LogReopener = log.ReopenOnSignal(logger, reopenableFile)

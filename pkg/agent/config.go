@@ -8,6 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
+	loggerv1 "github.com/spiffe/spire/pkg/agent/api/logger/v1"
 	"github.com/spiffe/spire/pkg/agent/workloadkey"
 	"github.com/spiffe/spire/pkg/common/catalog"
 	"github.com/spiffe/spire/pkg/common/health"
@@ -49,7 +50,9 @@ type Config struct {
 	// Configurations for agent plugins
 	PluginConfigs catalog.PluginConfigs
 
-	Log logrus.FieldLogger
+	Log loggerv1.Logger
+
+	LaunchLogLevel logrus.Level
 
 	// LogReopener facilitates handling a signal to rotate log file.
 	LogReopener func(context.Context) error

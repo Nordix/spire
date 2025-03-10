@@ -8,6 +8,7 @@ import (
 	secret_v3 "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	"github.com/sirupsen/logrus"
 	workload_pb "github.com/spiffe/go-spiffe/v2/proto/spiffe/workload"
+	loggerv1 "github.com/spiffe/spire-api-sdk/proto/spire/api/agent/logger/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -31,11 +32,16 @@ type Endpoints struct {
 	workloadAPIServer workload_pb.SpiffeWorkloadAPIServer
 	sdsv3Server       secret_v3.SecretDiscoveryServiceServer
 	healthServer      grpc_health_v1.HealthServer
+	APIServers        APIServers
 
 	hooks struct {
 		// test hook used to indicate that is listening
 		listening chan struct{}
 	}
+}
+
+type APIServers struct {
+	LoggerServer loggerv1.LoggerServer
 }
 
 func New(c Config) *Endpoints {
@@ -107,6 +113,8 @@ func (e *Endpoints) ListenAndServe(ctx context.Context) error {
 	workload_pb.RegisterSpiffeWorkloadAPIServer(server, e.workloadAPIServer)
 	secret_v3.RegisterSecretDiscoveryServiceServer(server, e.sdsv3Server)
 	grpc_health_v1.RegisterHealthServer(server, e.healthServer)
+
+	loggerv1.RegisterLoggerServer(server, e.APIServers.LoggerServer)
 
 	reflection.Register(server)
 

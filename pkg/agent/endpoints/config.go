@@ -8,11 +8,13 @@ import (
 	workload_pb "github.com/spiffe/go-spiffe/v2/proto/spiffe/workload"
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	healthv1 "github.com/spiffe/spire/pkg/agent/api/health/v1"
+	loggerv1 "github.com/spiffe/spire/pkg/agent/api/logger/v1"
 	attestor "github.com/spiffe/spire/pkg/agent/attestor/workload"
 	"github.com/spiffe/spire/pkg/agent/endpoints/sdsv3"
 	"github.com/spiffe/spire/pkg/agent/endpoints/workload"
 	"github.com/spiffe/spire/pkg/agent/manager"
 	"github.com/spiffe/spire/pkg/common/telemetry"
+	"github.com/spiffe/spire/pkg/server/api"
 	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -23,7 +25,14 @@ type Config struct {
 
 	Manager manager.Manager
 
+	// The logger for the endpoints subsystem
 	Log logrus.FieldLogger
+
+	// The root logger for the entire process
+	RootLog loggerv1.Logger
+
+	// The default (original config) log level
+	LaunchLogLevel logrus.Level
 
 	Metrics telemetry.Metrics
 
@@ -50,4 +59,12 @@ type Config struct {
 	newWorkloadAPIServer func(workload.Config) workload_pb.SpiffeWorkloadAPIServer
 	newSDSv3Server       func(sdsv3.Config) secret_v3.SecretDiscoveryServiceServer
 	newHealthServer      func(healthv1.Config) grpc_health_v1.HealthServer
+}
+
+func (c *Config) makeAPIServers(entryFetcher api.AuthorizedEntryFetcher) APIServers {
+	return APIServers{
+		LoggerServer: loggerv1.New(loggerv1.Config{
+			Log: c.RootLog,
+		}),
+	}
 }
