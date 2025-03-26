@@ -13,13 +13,22 @@ import (
 )
 
 // Each time the database requires a migration, the "schema" version is
-// increased and the migration code is added to this file. The migration code
-// can be opportunistically removed after the following minor version has been
-// released, since the supported upgrade path happens on minor version
-// boundaries. For example, when 1.2 is released, the migrations that were
-// handled by 1.1.x can be removed, since anyone upgrading from 1.0.X to 1.2.X
-// will have to upgrade through 1.1.X first, which will apply the proper
-// migrations before those done by 1.2.
+// increased and the migration code is added to this file.
+//
+// This is an alternative version of the migration code that does not follow the maintenance
+// strategy of SPIRE, because it could contain more schema changes than one minor release
+// to be able to support upgrade from older versions too.
+// The schema upgrade is done step-by-step from the first change to the current one.
+//
+// Another thing changed to the original migration strategy is that backward compatibility
+// is considered, this way a rollback is also supported to the previous version which contained
+// another schema. For example: v1.6.0 (schema 20) removes a column from a table. Rolling back
+// to 1.5.6 (schema 19) would not be possible because there is a missing column from the table
+// which the code wants to use.
+//
+// Code version in the database will not be updated to keep backward compatibility with the old
+// version to support code rollback. Migration table will contain the code version that initialized
+// the database. The later migrations will just modify the updated_at field and the schema version.
 //
 // For convenience, the following table lists the schema versions for each
 // SPIRE release, along with what was added in each schema change. SPIRE v0.6.2
@@ -309,11 +318,12 @@ func migrateDB(db *gorm.DB, dbType string, disableMigration bool, log logrus.Fie
 	if schemaVersion == latestSchemaVersion {
 		log.Debug("Code and DB schema versions are the same. No migration needed")
 
-		// same DB schema; if current code version greater than stored, store newer code version
+		// same DB schema; if current code version greater than stored, store time in updated_at field
 		if codeVersion.GT(dbCodeVersion) {
 			newMigration := Migration{
-				Version:     latestSchemaVersion,
-				CodeVersion: codeVersion.String(),
+				Version: latestSchemaVersion,
+				// Don't update code version in the database to support rollback.
+				// CodeVersion: codeVersion.String(),
 			}
 
 			if err := db.Model(&Migration{}).Updates(newMigration).Error; err != nil {
@@ -454,10 +464,12 @@ func tableOptionsForDialect(tx *gorm.DB, dbType string) *gorm.DB {
 func migrateVersion(tx *gorm.DB, currVersion int, log logrus.FieldLogger) (versionOut int, err error) {
 	log.WithField(telemetry.VersionInfo, currVersion).Info("Migrating version")
 
-	nextVersion := currVersion + 1
+	//	nextVersion must be defined
+	nextVersion := 23
 	if err := tx.Model(&Migration{}).Updates(Migration{
-		Version:     nextVersion,
-		CodeVersion: version.Version(),
+		Version: nextVersion,
+		// Don't add code version because it will prevent rollback.
+		// CodeVersion: version.Version(),
 	}).Error; err != nil {
 		return 0, newWrappedSQLError(err)
 	}

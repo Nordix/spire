@@ -19,6 +19,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/Microsoft/go-winio v0.6.2
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129
+	github.com/aperturerobotics/fastjson v0.1.1
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
@@ -76,7 +77,6 @@ require (
 	github.com/spiffe/spire-plugin-sdk v1.4.4-0.20240701180828-594312f4444d
 	github.com/stretchr/testify v1.10.0
 	github.com/uber-go/tally/v4 v4.1.16
-	github.com/valyala/fastjson v1.6.4
 	golang.org/x/crypto v0.36.0
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 	golang.org/x/net v0.37.0
