@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/andres-erbsen/clock"
+	"github.com/aperturerobotics/fastjson"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/hcl"
 	hcltoken "github.com/hashicorp/hcl/hcl/token"
@@ -31,7 +32,6 @@ import (
 	"github.com/spiffe/spire/pkg/common/pemutil"
 	"github.com/spiffe/spire/pkg/common/pluginconf"
 	"github.com/spiffe/spire/pkg/common/telemetry"
-	"github.com/valyala/fastjson"
 	"golang.org/x/sync/singleflight"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
