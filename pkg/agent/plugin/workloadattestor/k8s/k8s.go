@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -1481,7 +1482,7 @@ func (p *Plugin) reloadKubeletClient(config *k8sConfig) (err error) {
 		},
 		URL: url.URL{
 			Scheme: "https",
-			Host:   fmt.Sprintf("%s:%d", host, config.Port),
+			Host:   net.JoinHostPort(host, strconv.Itoa(config.Port)),
 		},
 		Token: token,
 	}

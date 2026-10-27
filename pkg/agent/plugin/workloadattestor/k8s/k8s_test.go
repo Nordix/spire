@@ -519,6 +519,22 @@ func (s *Suite) TestConfigure() {
 			},
 		},
 		{
+			name:        "secure with IPv6 node name",
+			trustDomain: "example.org",
+			hcl: `
+				node_name = "fd00:eccd:0:c0c::267"
+			`,
+			config: &config{
+				VerifyKubelet:     true,
+				KubeletURL:        "https://[fd00:eccd:0:c0c::267]:10250",
+				Token:             "default-token",
+				HasNodeName:       true,
+				MaxPollAttempts:   defaultMaxPollAttempts,
+				PollRetryInterval: defaultPollRetryInterval,
+				ReloadInterval:    defaultReloadInterval,
+			},
+		},
+		{
 			name:        "API server cache enabled",
 			trustDomain: "example.org",
 			hcl: `
